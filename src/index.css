@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/*
+ * DESIGN SYSTEM — Nonna Mia
+ * 1) Primitives : la palette brute (ne s'utilisent pas directement dans les composants)
+ * 2) Sémantiques : ce que les composants utilisent (bg-canvas, text-primary…)
+ * Pour changer le thème, on ne touche que ce bloc.
+ */
+@theme {
+  /* Primitives */
+  --color-tomato-500: #c8372d;
+  --color-tomato-700: #9f2a22;
+  --color-basil-500: #3f6b3a;
+  --color-cream-100: #fffaf0;
+  --color-cream-200: #f6eedc;
+  --color-espresso-900: #2b1d14;
+
+  /* Sémantiques */
+  --color-canvas: var(--color-cream-200);       /* fond de page */
+  --color-surface: var(--color-cream-100);      /* cartes, champs */
+  --color-fg: var(--color-espresso-900);        /* texte principal */
+  --color-muted: color-mix(in oklab, var(--color-espresso-900) 62%, transparent);
+  --color-line: color-mix(in oklab, var(--color-espresso-900) 14%, transparent);
+  --color-primary: var(--color-tomato-500);     /* actions, titres */
+  --color-primary-press: var(--color-tomato-700);
+  --color-on-primary: var(--color-cream-100);
+  --color-accent: var(--color-basil-500);       /* badges, succès */
+
+  /* Typo, formes, ombres, animations */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --radius-card: 1rem;
+  --radius-field: 0.75rem;
+  --shadow-card: 4px 4px 0 color-mix(in oklab, var(--color-espresso-900) 9%, transparent);
+  --shadow-button: 0 3px 0 var(--color-primary-press);
+  --animate-pop: pop 0.35s ease-out both;
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-fg antialiased;
+    /* nappe à carreaux vichy */
+    background-image:
+      linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 6%, transparent) 50%, transparent 50%),
+      linear-gradient(color-mix(in oklab, var(--color-primary) 6%, transparent) 50%, transparent 50%);
+    background-size: 28px 28px;
+    padding-top: env(safe-area-inset-top);
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer components {
+  .btn { @apply rounded-full bg-primary px-5 py-3 font-bold text-on-primary shadow-button transition active:translate-y-0.5 active:shadow-none disabled:opacity-50; }
+  .btn-ghost { @apply rounded-full border-2 border-line px-5 py-3 font-bold; }
+  .input { @apply w-full rounded-field border-2 border-line bg-surface px-4 py-3 outline-none focus:border-primary; }
+  .card { @apply animate-pop rounded-card border-2 border-line bg-surface p-4 shadow-card; }
+  .title { @apply font-display text-3xl italic text-primary; }
+}
