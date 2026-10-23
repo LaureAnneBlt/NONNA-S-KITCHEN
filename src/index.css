@@ -2,40 +2,42 @@
 
 /*
  * DESIGN SYSTEM — Nonna Mia
- * 1) Primitives : la palette brute (ne s'utilisent pas directement dans les composants)
- * 2) Sémantiques : ce que les composants utilisent (bg-canvas, text-primary…)
- * Pour changer le thème, on ne touche que ce bloc.
+ * Primitives (palette brute) puis tokens sémantiques utilisés par les composants.
  */
-@theme {
+@theme static {
   /* Primitives */
   --color-tomato-500: #c8372d;
   --color-tomato-700: #9f2a22;
   --color-basil-500: #3f6b3a;
-  --color-cream-100: #fffaf0;
-  --color-cream-200: #f6eedc;
+  --color-cream-50: #fffdf9;
+  --color-cream-100: #faf5ea;
   --color-espresso-900: #2b1d14;
 
   /* Sémantiques */
-  --color-canvas: var(--color-cream-200);       /* fond de page */
-  --color-surface: var(--color-cream-100);      /* cartes, champs */
-  --color-fg: var(--color-espresso-900);        /* texte principal */
-  --color-muted: color-mix(in oklab, var(--color-espresso-900) 62%, transparent);
-  --color-line: color-mix(in oklab, var(--color-espresso-900) 14%, transparent);
-  --color-primary: var(--color-tomato-500);     /* actions, titres */
+  --color-canvas: var(--color-cream-100);
+  --color-surface: var(--color-cream-50);
+  --color-fg: var(--color-espresso-900);
+  --color-muted: color-mix(in oklab, var(--color-espresso-900) 60%, transparent);
+  --color-line: color-mix(in oklab, var(--color-espresso-900) 11%, transparent);
+  --color-primary: var(--color-tomato-500);
   --color-primary-press: var(--color-tomato-700);
-  --color-on-primary: var(--color-cream-100);
-  --color-accent: var(--color-basil-500);       /* badges, succès */
+  --color-on-primary: var(--color-cream-50);
+  --color-accent: var(--color-basil-500);
+  --color-door: var(--color-basil-500);   /* porte d'entrée */
+  --color-brass: #c9a24b;                 /* poignées, clou */
+  --color-wood: #6b4226;                  /* cadre de la pancarte */
+  --color-edge: color-mix(in oklab, var(--color-wood) 30%, transparent); /* bordures des cartes */
 
-  /* Typo, formes, ombres, animations */
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "DM Sans", system-ui, sans-serif;
-  --radius-card: 1rem;
-  --radius-field: 0.75rem;
-  --shadow-card: 4px 4px 0 color-mix(in oklab, var(--color-espresso-900) 9%, transparent);
+  --radius-card: 1.25rem;
+  --radius-field: 0.875rem;
+  --shadow-card: 4px 4px 0 color-mix(in oklab, var(--color-wood) 16%, transparent);
   --shadow-button: 0 3px 0 var(--color-primary-press);
-  --animate-pop: pop 0.35s ease-out both;
+  --shadow-fab: 0 4px 0 var(--color-primary-press), 0 10px 18px rgb(0 0 0 / 0.2);
+  --animate-pop: pop 0.3s ease-out both;
   @keyframes pop {
-    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: none; }
   }
 }
@@ -43,20 +45,124 @@
 @layer base {
   body {
     @apply bg-canvas font-sans text-fg antialiased;
-    /* nappe à carreaux vichy */
+    /* nappe à carreaux */
     background-image:
-      linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 6%, transparent) 50%, transparent 50%),
-      linear-gradient(color-mix(in oklab, var(--color-primary) 6%, transparent) 50%, transparent 50%);
+      linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 8%, transparent) 50%, transparent 50%),
+      linear-gradient(color-mix(in oklab, var(--color-primary) 8%, transparent) 50%, transparent 50%);
     background-size: 28px 28px;
-    padding-top: env(safe-area-inset-top);
+    padding-bottom: var(--kb-inset, 0px); /* clavier mobile */
     overscroll-behavior-y: none;
   }
+  button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @layer components {
   .btn { @apply rounded-full bg-primary px-5 py-3 font-bold text-on-primary shadow-button transition active:translate-y-0.5 active:shadow-none disabled:opacity-50; }
-  .btn-ghost { @apply rounded-full border-2 border-line px-5 py-3 font-bold; }
-  .input { @apply w-full rounded-field border-2 border-line bg-surface px-4 py-3 outline-none focus:border-primary; }
-  .card { @apply animate-pop rounded-card border-2 border-line bg-surface p-4 shadow-card; }
-  .title { @apply font-display text-3xl italic text-primary; }
+  .btn-ghost { @apply rounded-full border-2 border-edge bg-surface px-5 py-3 font-bold text-fg transition active:bg-canvas; }
+  .input { @apply w-full rounded-field border-2 border-edge bg-surface px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10; }
+  .card { @apply rounded-card border-2 border-edge bg-surface shadow-card; }
+  .title { @apply font-display text-3xl font-semibold italic text-primary; }
+  .label { @apply text-xs font-bold uppercase tracking-wider text-primary; }
+  .chip { @apply inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-xs font-bold text-accent; }
+  .pill { @apply shrink-0 rounded-full border-2 border-edge bg-surface px-4 py-2 text-sm font-bold text-muted transition; }
+  .pill-active { @apply border-primary bg-primary text-on-primary; }
+  .fab { @apply grid size-14 place-items-center rounded-full border-[3px] border-brass bg-primary text-on-primary shadow-fab transition active:translate-y-0.5 active:shadow-none; }
+  .gingham {
+    background-color: var(--color-surface);
+    background-image:
+      linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 14%, transparent) 50%, transparent 50%),
+      linear-gradient(color-mix(in oklab, var(--color-primary) 14%, transparent) 50%, transparent 50%);
+    background-size: 20px 20px;
+  }
+  /* Surface « bois peint en vert » : en-tête et barre de navigation, comme la porte */
+  .app-header, .app-nav {
+    background:
+      repeating-linear-gradient(90deg, rgb(0 0 0 / 0.04) 0 2px, transparent 2px 9px),
+      var(--color-door);
+    color: var(--color-on-primary);
+  }
+  .app-header {
+    @apply sticky top-0 z-10 border-b-[3px] border-brass px-5 pb-3 shadow-[0_4px_12px_rgb(0_0_0/0.18)];
+    padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+  }
+  .app-nav {
+    @apply fixed inset-x-0 bottom-0 z-20 border-t-[3px] border-brass;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ---------- Entrée dans la cuisine (login → app) ---------- */
+.doors {
+  position: fixed; inset: 0; z-index: 40; overflow: hidden; pointer-events: none;
+  perspective: 1600px; transform-origin: 50% 50%;
+  transition: transform 1.8s cubic-bezier(0.55, 0.05, 0.3, 1) 0.1s; /* on avance vers la porte */
+}
+.doors[data-open="true"] { transform: scale(2.8); }
+.door-leaf {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  display: flex; flex-direction: column; justify-content: space-evenly; padding: 2rem 1.25rem;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.2), transparent 16%, transparent 84%, rgb(0 0 0 / 0.16)),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.04) 0 2px, transparent 2px 9px),
+    var(--color-door);
+  box-shadow: inset 0 0 0 4px rgb(0 0 0 / 0.12);
+  backface-visibility: hidden; will-change: transform;
+  transition: transform 1.2s cubic-bezier(0.65, 0, 0.25, 1) 0.15s, filter 1.2s ease 0.15s;
+}
+.door-left { left: 0; transform-origin: left center; border-right: 2px solid rgb(0 0 0 / 0.4); }
+.door-right { right: 0; transform-origin: right center; }
+.doors[data-open="true"] .door-left { transform: rotateY(82deg); filter: brightness(0.5); }
+.doors[data-open="true"] .door-right { transform: rotateY(-82deg); filter: brightness(0.5); }
+.door-panel {
+  flex: 1; margin: 1rem 0; border-radius: 0.75rem;
+  border: 3px solid rgb(0 0 0 / 0.2); background: rgb(0 0 0 / 0.07);
+  box-shadow: inset 3px 3px 8px rgb(0 0 0 / 0.28), 2px 2px 0 rgb(255 255 255 / 0.12);
+}
+.door-knob {
+  position: absolute; bottom: 4.5rem; width: 1.7rem; height: 1.7rem; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f3dc9a, var(--color-brass) 55%, #8a6b24);
+  box-shadow: 0 3px 6px rgb(0 0 0 / 0.45);
+}
+.door-left .door-knob { right: 0.9rem; }
+.door-right .door-knob { left: 0.9rem; }
+
+/* Pancarte suspendue à la porte : fond à carreaux, cadre en bois */
+.sign-wrap { position: relative; margin-top: 3rem; transform-origin: 50% -2.6rem; animation: sway 2.8s ease-out 0.2s both; }
+.sign {
+  position: relative; z-index: 1; padding: 1.5rem 1.25rem;
+  border: 6px solid var(--color-wood); border-radius: 1.1rem;
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 16%, transparent) 50%, transparent 50%),
+    linear-gradient(color-mix(in oklab, var(--color-primary) 16%, transparent) 50%, transparent 50%);
+  background-size: 20px 20px;
+  box-shadow: 0 14px 28px rgb(0 0 0 / 0.4), inset 0 0 0 2px rgb(255 255 255 / 0.4);
+}
+.sign-cords { position: absolute; left: 0; right: 0; top: -2.6rem; width: 100%; height: 2.8rem; overflow: visible; }
+.sign-cords path { stroke: #b08a5b; stroke-width: 2.5; fill: none; vector-effect: non-scaling-stroke; }
+.sign-nail {
+  position: absolute; z-index: 2; top: -3rem; left: 50%; width: 1rem; height: 1rem; margin-left: -0.5rem; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f3dc9a, var(--color-brass) 60%, #8a6b24);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.5);
+}
+/* un balancement amorti à l'arrivée, puis la pancarte reste stable (formulaire utilisable) */
+@keyframes sway { 0% { rotate: 3.5deg; } 22% { rotate: -2.5deg; } 45% { rotate: 1.4deg; } 68% { rotate: -0.7deg; } 100% { rotate: 0deg; } }
+
+/* Couche du formulaire : scrollable, recentrée au-dessus du clavier */
+.login-layer {
+  position: fixed; inset: 0; z-index: 50; overflow-y: auto; overscroll-behavior: contain;
+  padding-bottom: var(--kb-inset, 0px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.login-layer.is-open { opacity: 0; transform: scale(1.06); pointer-events: none; }
+
+/* L'app, vue de loin, qui se rapproche pendant qu'on franchit la porte */
+.enter-app { animation: enter 1.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s both; }
+@keyframes enter { from { transform: scale(0.72); filter: brightness(0.6); } to { transform: none; filter: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sign-wrap, .enter-app { animation: none; }
+  .doors { transition: opacity 0.3s; }
+  .doors[data-open="true"] { transform: none; opacity: 0; }
+  .door-leaf { transition: none; }
 }
