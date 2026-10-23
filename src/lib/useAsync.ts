@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
+import { frenchError } from "./errors";
 
-/** Mini hook de chargement. Remplaçable par TanStack Query quand l'app grossit. */
 export function useAsync<T>(fn: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -8,7 +8,10 @@ export function useAsync<T>(fn: () => Promise<T>) {
 
   const reload = useCallback(() => {
     setLoading(true);
-    fn().then(setData).catch((e) => setError(e.message)).finally(() => setLoading(false));
+    fn()
+      .then(setData)
+      .catch((e) => setError(frenchError(e)))
+      .finally(() => setLoading(false));
   }, [fn]);
 
   useEffect(reload, [reload]);

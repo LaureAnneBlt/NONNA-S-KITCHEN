@@ -1,19 +1,59 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Session } from '@supabase/supabase-js';
-import { supabase } from '../../lib/supabase';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session } from "@supabase/supabase-js";
+import { arrivedFromRecoveryLink, supabase } from "../../lib/supabase";
 
-type AuthState = { session: Session | null; loading: boolean };
-const AuthContext = createContext<AuthState>({ session: null, loading: true });
+type AuthState = {
+  session: Session | null;
+  loading: boolean;
+  recovery: boolean;
+  startRecovery: () => void;
+  endRecovery: () => void;
+};
+const AuthContext = createContext<AuthState>({
+  session: null,
+  loading: true,
+  recovery: false,
+  startRecovery: () => {},
+  endRecovery: () => {},
+});
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ session: null, loading: true });
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [recovery, setRecovery] = useState(arrivedFromRecoveryLink);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setState({ session: data.session, loading: false }));
-    const { data } = supabase.auth.onAuthStateChange((_e, session) => setState({ session, loading: false }));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+      setSession(session);
+      setLoading(false);
+    });
     return () => data.subscription.unsubscribe();
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  if (loading) return null;
+  return (
+    <AuthContext.Provider
+      value={{
+        session,
+        loading,
+        recovery,
+        startRecovery: () => setRecovery(true),
+        endRecovery: () => setRecovery(false),
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
