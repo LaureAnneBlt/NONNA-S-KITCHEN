@@ -40,7 +40,13 @@ function Protected() {
   return (
     <>
       {phase !== "login" && (
-        <div className={phase === "opening" ? "enter-app" : undefined}>
+        <div
+          className={
+            phase === "opening"
+              ? "animate-enter motion-reduce:animate-none"
+              : undefined
+          }
+        >
           <Layout />
         </div>
       )}

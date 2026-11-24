@@ -4,21 +4,22 @@ import { useAsync } from "../../lib/useAsync";
 import { listRecipes, photoUrl, type Recipe } from "./api";
 import { listGroups } from "../groups/api";
 import { useAuth } from "../auth/AuthProvider";
-import { Icon } from "../../components/Icons";
-import { PageHeader } from "../../components/PageHeader";
-import Tomato from "../../components/Tomato";
+import {
+  ButtonLink,
+  Card,
+  Chip,
+  Icon,
+  Input,
+  Message,
+  PageHeader,
+  Photo,
+  Plate,
+  SectionTitle,
+  Skeleton,
+  Tomato,
+} from "../../ui";
 
 const plural = (n: number) => `${n} recette${n > 1 ? "s" : ""}`;
-
-export function PhotoPlaceholder({ size = 40 }: { size?: number }) {
-  return (
-    <div className="gingham grid h-full w-full place-items-center">
-      <span className="plate">
-        <Tomato size={size} />
-      </span>
-    </div>
-  );
-}
 
 function RecipeTile({
   recipe: r,
@@ -30,9 +31,10 @@ function RecipeTile({
   mine: boolean;
 }) {
   return (
-    <Link
+    <Card
+      as={Link}
       to={`/recettes/${r.id}`}
-      className="print relative flex animate-pop flex-col transition active:scale-[0.98]"
+      className="relative flex animate-pop flex-col p-1.5 transition active:scale-[0.98]"
     >
       {r.favorite && (
         <span
@@ -42,18 +44,11 @@ function RecipeTile({
           <Icon name="heart" size={14} filled />
         </span>
       )}
-      {r.photo_path ? (
-        <img
-          src={photoUrl(r.photo_path)}
-          alt=""
-          loading="lazy"
-          className="aspect-square w-full object-cover"
-        />
-      ) : (
-        <div className="photo aspect-square overflow-hidden">
-          <PhotoPlaceholder />
-        </div>
-      )}
+      <Photo
+        src={r.photo_path && photoUrl(r.photo_path)}
+        lazy
+        className="aspect-square"
+      />
       <h2 className="mt-2.5 line-clamp-2 px-1.5 font-display text-[1.0625rem] leading-snug font-semibold italic">
         {r.title}
       </h2>
@@ -70,7 +65,7 @@ function RecipeTile({
           de {r.author}
         </p>
       )}
-    </Link>
+    </Card>
   );
 }
 
@@ -122,8 +117,8 @@ export default function RecipesPage() {
             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle">
               <Icon name="search" size={18} />
             </span>
-            <input
-              className="input pl-10"
+            <Input
+              className="pl-10"
               type="search"
               placeholder="Une recette, un ingrédient, un prénom…"
               value={query}
@@ -132,62 +127,63 @@ export default function RecipesPage() {
           </div>
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 scrollbar-none">
             {filters.map((f) => (
-              <button
+              <Chip
                 key={f.id}
+                on={filter === f.id}
                 aria-pressed={filter === f.id}
-                className={`filter ${filter === f.id ? "is-on" : ""}`}
                 onClick={() => setFilter(f.id)}
               >
                 {f.id === "favorites" && (
                   <Icon name="heart" size={14} filled={filter === f.id} />
                 )}
                 {f.name}
-              </button>
+              </Chip>
             ))}
           </div>
         </div>
       )}
 
-      {recipes.error && (
-        <p className="text-sm font-semibold text-primary" role="alert">
-          {recipes.error}
-        </p>
-      )}
+      {recipes.error && <Message>{recipes.error}</Message>}
       {recipes.loading && (
         <div className="grid grid-cols-2 gap-x-3 gap-y-5">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="skeleton aspect-4/5" />
+            <Skeleton key={i} className="aspect-4/5" />
           ))}
         </div>
       )}
 
       {empty && (
-        <div className="card card-menu flex flex-col items-center px-6 py-10 text-center">
-          <span className="plate">
+        <Card
+          menu
+          className="flex flex-col items-center px-6 py-10 text-center"
+        >
+          <Plate>
             <Tomato size={40} />
-          </span>
-          <h2 className="section-title mt-5 italic">Le ricettario est vide</h2>
+          </Plate>
+          <SectionTitle className="mt-5 italic">
+            Le ricettario est vide
+          </SectionTitle>
           <p className="mt-1.5 max-w-[16rem] text-sm text-muted">
             Commence par la recette que tout le monde te réclame.
           </p>
-          <Link to="/recettes/nouvelle" className="btn btn-sm mt-6">
+          <ButtonLink to="/recettes/nouvelle" size="sm" className="mt-6">
             <Icon name="plus" size={18} />
             Ajouter une recette
-          </Link>
-        </div>
+          </ButtonLink>
+        </Card>
       )}
       {!empty &&
         visible?.length === 0 &&
         (filter === "favorites" && !q ? (
           <div className="py-10 text-center">
-            <h2 className="section-title">Pas encore de favorites</h2>
+            <SectionTitle>Pas encore de favorites</SectionTitle>
             <p className="mt-1.5 text-sm text-muted">
               Touche le cœur sur une recette pour la retrouver ici.
             </p>
           </div>
         ) : (
           <div className="py-10 text-center">
-            <h2 className="section-title">Aucune recette trouvée</h2>
+            <SectionTitle>Aucune recette trouvée</SectionTitle>
             <p className="mt-1.5 text-sm text-muted">
               Essaie un autre mot ou un autre filtre.
             </p>

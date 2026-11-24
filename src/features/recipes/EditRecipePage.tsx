@@ -4,6 +4,7 @@ import { useAsync } from "../../lib/useAsync";
 import { useAuth } from "../auth/AuthProvider";
 import { getRecipe } from "./api";
 import RecipeForm from "./RecipeForm";
+import { Card, Skeleton } from "../../ui";
 
 export default function EditRecipePage() {
   const { id } = useParams();
@@ -11,16 +12,18 @@ export default function EditRecipePage() {
   const load = useCallback(() => getRecipe(id!), [id]);
   const { data: recipe, loading, error } = useAsync(load);
 
-  if (loading) return <div className="skeleton h-64" />;
+  if (loading) return <Skeleton className="h-64" />;
   if (error || !recipe)
     return (
-      <p className="card p-6 text-center text-muted">Recette introuvable.</p>
+      <Card as="p" className="p-6 text-center text-muted">
+        Recette introuvable.
+      </Card>
     );
   if (recipe.owner_id !== session?.user.id)
     return (
-      <p className="card p-6 text-center text-muted">
+      <Card as="p" className="p-6 text-center text-muted">
         Seule la personne qui a créé cette recette peut la modifier.
-      </p>
+      </Card>
     );
   return <RecipeForm recipe={recipe} />;
 }

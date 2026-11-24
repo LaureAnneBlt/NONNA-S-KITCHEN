@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Icon } from "./Icons";
+import { Icon } from "./Icon";
+import { Ornament } from "./Decor";
+import { Eyebrow, PageTitle } from "./Typography";
 
 export function PageHeader({
   eyebrow,
@@ -13,11 +15,9 @@ export function PageHeader({
 }) {
   return (
     <header className="flex flex-col items-center gap-2 text-center">
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="page-title">{title}</h1>
-      <div className="ornament w-24">
-        <i />
-      </div>
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <PageTitle>{title}</PageTitle>
+      <Ornament className="w-24" />
       {children && (
         <p className="max-w-[20rem] text-[0.9375rem] text-muted">{children}</p>
       )}

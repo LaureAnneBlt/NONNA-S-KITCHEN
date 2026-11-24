@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type KeyboardEvent } from "react";
-import { Icon } from "../../components/Icons";
+import { Button, Icon, IconButton, StepNumber, Textarea } from "../../ui";
 
 type Props = { value: string[]; onChange: (steps: string[]) => void };
 
@@ -59,15 +59,15 @@ export default function StepsEditor({ value, onChange }: Props) {
       <ol className="flex flex-col gap-2.5">
         {value.map((step, i) => (
           <li key={i} className="flex items-start gap-2.5">
-            <span className="num w-5 shrink-0 pt-3 text-right text-[1.125rem]">
+            <StepNumber className="w-5 shrink-0 pt-3 text-right text-[1.125rem]">
               {i + 1}
-            </span>
-            <textarea
+            </StepNumber>
+            <Textarea
               ref={(el) => {
                 fields.current[i] = el;
               }}
               rows={1}
-              className="input min-w-0 flex-1"
+              className="min-w-0 flex-1"
               aria-label={`Étape ${i + 1}`}
               placeholder={
                 i === 0 ? "Décris la première étape…" : "Étape suivante…"
@@ -78,24 +78,26 @@ export default function StepsEditor({ value, onChange }: Props) {
               onKeyDown={(e) => onKeyDown(e, i)}
             />
             {value.length > 1 && (
-              <button
-                type="button"
-                aria-label={`Retirer l’étape ${i + 1}`}
-                className="icon-btn mt-0.5 size-9"
+              <IconButton
+                label={`Retirer l’étape ${i + 1}`}
+                size="sm"
+                className="mt-0.5"
                 onClick={() => {
                   focusAt.current = null;
                   replace(i, []);
                 }}
               >
                 <Icon name="x" size={18} />
-              </button>
+              </IconButton>
             )}
           </li>
         ))}
       </ol>
-      <button
+      <Button
         type="button"
-        className="btn-secondary btn-sm border-dashed"
+        variant="secondary"
+        size="sm"
+        className="border-dashed"
         onClick={() => {
           focusAt.current = { index: value.length, end: true };
           onChange([...value, ""]);
@@ -103,7 +105,7 @@ export default function StepsEditor({ value, onChange }: Props) {
       >
         <Icon name="plus" size={16} />
         Ajouter une étape
-      </button>
+      </Button>
     </div>
   );
 }

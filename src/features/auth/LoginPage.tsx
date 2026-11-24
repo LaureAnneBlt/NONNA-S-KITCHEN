@@ -1,9 +1,19 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { authLinkError, supabase } from "../../lib/supabase";
 import { useAuth } from "./AuthProvider";
 import Doors from "../../components/Doors";
-import Tomato from "../../components/Tomato";
-import { Icon } from "../../components/Icons";
+import {
+  Button,
+  cn,
+  Field,
+  Icon,
+  IconButton,
+  Input,
+  Message,
+  Rule,
+  TextButton,
+  Tomato,
+} from "../../ui";
 import { frenchError } from "../../lib/errors";
 import OtpInput from "./OtpInput";
 
@@ -117,208 +127,204 @@ export default function LoginPage({ open = false }: { open?: boolean }) {
   return (
     <>
       <Doors open={open} />
-      <div className={`login-layer ${open ? "is-open" : ""}`}>
+      <div
+        className={cn(
+          "fixed inset-0 z-50 overflow-y-auto overscroll-contain pt-[env(safe-area-inset-top)] pb-(--kb-inset,0px) transition-[opacity,scale] duration-350 ease-[ease]",
+          open && "pointer-events-none scale-[1.06] opacity-0",
+        )}
+      >
         <main className="mx-auto flex min-h-full max-w-sm flex-col justify-center p-6">
-          <div className="sign-wrap">
-            <span className="sign-nail" />
-            <svg
-              className="sign-cords"
-              viewBox="0 0 100 40"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path d="M50 0 L12 40 M50 0 L88 40" />
-            </svg>
-            <div className="sign flex flex-col gap-4">
-              <header className="flex flex-col items-center text-center">
-                <Tomato size={58} />
-                <h1 className="mt-3 font-display text-[2.15rem] font-semibold italic leading-none text-primary">
-                  Nonna’s Kitchen
-                </h1>
-                <p className="mt-2 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-accent">
-                  Cucina di famiglia
-                </p>
-                <div className="rule mt-4 w-24" />
-                <p className="mt-1 text-sm text-muted empty:hidden">
-                  {mode === "signup" ? (
-                    "Bienvenue à table ! Crée ton compte en quelques secondes."
-                  ) : mode === "forgot" ? (
-                    "Indique ton email : on t’envoie un code pour choisir un nouveau mot de passe."
-                  ) : mode === "code" ? (
-                    <>
-                      Entre le code à 6 chiffres envoyé à
-                      <br />
-                      <strong className="break-all font-semibold text-fg">
-                        {email}
-                      </strong>
-                    </>
-                  ) : mode === "reset" ? (
-                    "Choisis ton nouveau mot de passe."
-                  ) : (
-                    ""
-                  )}
-                </p>
-              </header>
-              <form onSubmit={submit} className="flex flex-col gap-3">
-                {mode === "code" && (
-                  <div className="flex flex-col items-center gap-2 pb-1">
-                    <OtpInput value={code} onChange={setCode} />
-                    <p className="text-xs text-muted">
-                      Rien reçu ? Regarde dans les spams.
-                    </p>
-                  </div>
+          <HangingSign>
+            <header className="flex flex-col items-center text-center">
+              <Tomato size={58} />
+              <h1 className="mt-3 font-display text-[2.15rem] font-semibold italic leading-none text-primary">
+                Nonna’s Kitchen
+              </h1>
+              <p className="mt-2 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-accent">
+                Cucina di famiglia
+              </p>
+              <Rule className="mt-4 w-24" />
+              <p className="mt-1 text-sm text-muted empty:hidden">
+                {mode === "signup" ? (
+                  "Bienvenue à table ! Crée ton compte en quelques secondes."
+                ) : mode === "forgot" ? (
+                  "Indique ton email : on t’envoie un code pour choisir un nouveau mot de passe."
+                ) : mode === "code" ? (
+                  <>
+                    Entre le code à 6 chiffres envoyé à
+                    <br />
+                    <strong className="break-all font-semibold text-fg">
+                      {email}
+                    </strong>
+                  </>
+                ) : mode === "reset" ? (
+                  "Choisis ton nouveau mot de passe."
+                ) : (
+                  ""
                 )}
-                {mode === "signup" && (
-                  <div>
-                    <label htmlFor="login-name" className="field-label">
-                      Ton prénom
-                    </label>
-                    <input
-                      id="login-name"
-                      className="input"
-                      placeholder="Visible par ta famille"
-                      autoComplete="given-name"
-                      maxLength={40}
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                )}
-                {(mode === "signin" ||
-                  mode === "signup" ||
-                  mode === "forgot") && (
-                  <div>
-                    <label htmlFor="login-email" className="field-label">
-                      Email
-                    </label>
-                    <input
-                      id="login-email"
-                      className="input"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      autoCapitalize="none"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                )}
-                {(mode === "signin" ||
-                  mode === "signup" ||
-                  mode === "reset") && (
-                  <div>
-                    <label htmlFor="login-password" className="field-label">
-                      {mode === "reset"
-                        ? "Nouveau mot de passe"
-                        : "Mot de passe"}
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="login-password"
-                        className="input pr-12"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete={
-                          mode === "signin"
-                            ? "current-password"
-                            : "new-password"
-                        }
-                        minLength={6}
-                        required
-                        placeholder={
-                          mode === "signin" ? undefined : "6 caractères minimum"
-                        }
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
-                      <button
-                        type="button"
-                        aria-label={
-                          showPassword
-                            ? "Masquer le mot de passe"
-                            : "Afficher le mot de passe"
-                        }
-                        aria-pressed={showPassword}
-                        className="icon-btn absolute right-1 top-1/2 -translate-y-1/2"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon
-                          name={showPassword ? "eyeOff" : "eye"}
-                          size={19}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {mode === "signin" && (
-                  <button
-                    type="button"
-                    className="-mt-1 self-end py-1 text-sm font-semibold text-muted underline underline-offset-2"
-                    onClick={() => go("forgot")}
-                  >
-                    Mot de passe oublié ?
-                  </button>
-                )}
-                {msg && (
-                  <p
-                    role={msg.ok ? "status" : "alert"}
-                    className={`text-sm font-semibold ${msg.ok ? "text-accent" : "text-primary"}`}
-                  >
-                    {msg.text}
+              </p>
+            </header>
+            <form onSubmit={submit} className="flex flex-col gap-3">
+              {mode === "code" && (
+                <div className="flex flex-col items-center gap-2 pb-1">
+                  <OtpInput value={code} onChange={setCode} />
+                  <p className="text-xs text-muted">
+                    Rien reçu ? Regarde dans les spams.
                   </p>
-                )}
-                <button className="btn" disabled={busy}>
-                  {SUBMIT[mode]}
-                </button>
-                {mode === "code" && (
-                  <div className="flex items-center justify-center gap-3 text-sm">
-                    <button
-                      type="button"
-                      className="underline underline-offset-2"
-                      onClick={resend}
-                    >
-                      Renvoyer le code
-                    </button>
-                    <span className="text-subtle" aria-hidden="true">
-                      ·
-                    </span>
-                    <button
-                      type="button"
-                      className="underline underline-offset-2"
-                      onClick={() => go("signin")}
-                    >
-                      Retour
-                    </button>
-                  </div>
-                )}
-                {mode !== "reset" && mode !== "code" && (
-                  <p className="text-center text-sm text-muted">
-                    {mode === "signin"
-                      ? "Pas encore de compte ? "
-                      : mode === "signup"
-                        ? "Déjà un compte ? "
-                        : ""}
-                    <button
-                      type="button"
-                      className="link underline"
-                      onClick={() =>
-                        go(mode === "signin" ? "signup" : "signin")
+                </div>
+              )}
+              {mode === "signup" && (
+                <Field label="Ton prénom" htmlFor="login-name">
+                  <Input
+                    id="login-name"
+                    placeholder="Visible par ta famille"
+                    autoComplete="given-name"
+                    maxLength={40}
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </Field>
+              )}
+              {(mode === "signin" ||
+                mode === "signup" ||
+                mode === "forgot") && (
+                <Field label="Email" htmlFor="login-email">
+                  <Input
+                    id="login-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Field>
+              )}
+              {(mode === "signin" || mode === "signup" || mode === "reset") && (
+                <Field
+                  label={
+                    mode === "reset" ? "Nouveau mot de passe" : "Mot de passe"
+                  }
+                  htmlFor="login-password"
+                >
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      className="pr-12"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={
+                        mode === "signin" ? "current-password" : "new-password"
                       }
+                      minLength={6}
+                      required
+                      placeholder={
+                        mode === "signin" ? undefined : "6 caractères minimum"
+                      }
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <IconButton
+                      label={
+                        showPassword
+                          ? "Masquer le mot de passe"
+                          : "Afficher le mot de passe"
+                      }
+                      aria-pressed={showPassword}
+                      className="absolute right-1 top-1/2 -translate-y-1/2"
+                      onClick={() => setShowPassword(!showPassword)}
                     >
-                      {mode === "signin"
-                        ? "Créer un compte"
-                        : mode === "signup"
-                          ? "Se connecter"
-                          : "Retour à la connexion"}
-                    </button>
-                  </p>
-                )}
-              </form>
-            </div>
-          </div>
+                      <Icon name={showPassword ? "eyeOff" : "eye"} size={19} />
+                    </IconButton>
+                  </div>
+                </Field>
+              )}
+              {mode === "signin" && (
+                <TextButton
+                  className="-mt-1 self-end py-1 text-sm font-semibold text-muted"
+                  onClick={() => go("forgot")}
+                >
+                  Mot de passe oublié ?
+                </TextButton>
+              )}
+              {msg && (
+                <Message tone={msg.ok ? "success" : "error"}>
+                  {msg.text}
+                </Message>
+              )}
+              <Button disabled={busy}>{SUBMIT[mode]}</Button>
+              {mode === "code" && (
+                <div className="flex items-center justify-center gap-3 text-sm">
+                  <TextButton onClick={resend}>Renvoyer le code</TextButton>
+                  <span className="text-subtle" aria-hidden="true">
+                    ·
+                  </span>
+                  <TextButton onClick={() => go("signin")}>Retour</TextButton>
+                </div>
+              )}
+              {mode !== "reset" && mode !== "code" && (
+                <p className="text-center text-sm text-muted">
+                  {mode === "signin"
+                    ? "Pas encore de compte ? "
+                    : mode === "signup"
+                      ? "Déjà un compte ? "
+                      : ""}
+                  <TextButton
+                    strong
+                    onClick={() => go(mode === "signin" ? "signup" : "signin")}
+                  >
+                    {mode === "signin"
+                      ? "Créer un compte"
+                      : mode === "signup"
+                        ? "Se connecter"
+                        : "Retour à la connexion"}
+                  </TextButton>
+                </p>
+              )}
+            </form>
+          </HangingSign>
         </main>
       </div>
     </>
+  );
+}
+
+const SCREWS = [
+  "left-[0.4rem] top-[0.4rem]",
+  "right-[0.4rem] top-[0.4rem]",
+  "bottom-[0.4rem] left-[0.4rem]",
+  "bottom-[0.4rem] right-[0.4rem]",
+];
+
+function HangingSign({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative mt-12 origin-[50%_-2.6rem] animate-sway motion-reduce:animate-none">
+      <span className="absolute -top-12 left-1/2 z-2 -ml-2 size-4 rounded-full bg-radial-[circle_at_35%_30%] from-brass-light via-brass via-60% to-brass-700 shadow-[0_2px_4px_rgb(0_0_0/0.5)]" />
+      <svg
+        className="absolute inset-x-0 top-[-2.6rem] h-[2.8rem] w-full overflow-visible"
+        viewBox="0 0 100 40"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M50 0 L12 40 M50 0 L88 40"
+          className="fill-none stroke-rope stroke-[2.5] [vector-effect:non-scaling-stroke]"
+        />
+      </svg>
+      <div className="relative z-1 flex flex-col gap-4 rounded-[1.1rem] border-6 border-wood bg-gingham px-[1.4rem] py-7 shadow-sign [--gingham-alpha:16%] [--gingham-size:20px]">
+        {SCREWS.map((position) => (
+          <span
+            key={position}
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute size-2.25 bg-[radial-gradient(circle,var(--color-brass)_0_2.5px,var(--color-brass-700)_3px,transparent_3.5px)]",
+              position,
+            )}
+          />
+        ))}
+        {children}
+      </div>
+    </div>
   );
 }

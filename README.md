@@ -74,8 +74,9 @@ L’app attend un code à **6 chiffres** : dans _Authentication → Sign In / Pr
 ### Où trouver quoi
 
 - `src/features/` : une fonctionnalité par dossier (`auth`, `recipes`, `groups`), avec ses pages et ses appels à Supabase.
-- `src/components/` : les éléments communs (en-tête, barre d’onglets, tomate…).
-- `src/index.css` : tout le design system. Les couleurs brutes (`tomato-500`…) d’abord, puis les noms utilisés par les composants (`bg-canvas`, `text-primary`, `border-line`…).
+- `src/ui/` : le design system. Des composants React stylés avec Tailwind (`Button`, `Card`, `Field`, `Chip`, `Tag`, `PageHeader`, `MenuHeading`…), tous exportés par `src/ui/index.ts`. Une page n’écrit jamais de classe CSS maison : elle assemble ces composants et ajoute des utilitaires Tailwind pour la mise en page.
+- `src/components/` : les morceaux propres à l’app (structure avec en-tête et onglets, porte d’entrée, menu du compte…).
+- `src/index.css` : seulement les tokens (couleurs brutes comme `tomato-500`, puis les noms par rôle comme `bg-canvas`, `text-primary`, `border-line` ; ombres `shadow-plate`… ; animations `animate-pop`…), deux textures (`bg-gingham`, `bg-planks`) et les styles de base de la page.
 - `public/` : les icônes de l’app ; `vite.config.ts` : la configuration de l’installation sur téléphone.
 
 </details>

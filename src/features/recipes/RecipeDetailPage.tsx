@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAsync } from "../../lib/useAsync";
 import { useWakeLock } from "../../lib/useWakeLock";
 import { useCookingProgress } from "../../lib/useCookingProgress";
@@ -8,9 +8,26 @@ import { deleteRecipe, getRecipe, photoUrl, setFavorite } from "./api";
 import { formatDuration, formatQuantity } from "./format";
 import { listGroups } from "../groups/api";
 import { useAuth } from "../auth/AuthProvider";
-import { Icon, type IconName } from "../../components/Icons";
-import { TopBar } from "../../components/PageHeader";
 import { useConfirm } from "../../components/Confirm";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  cn,
+  Icon,
+  IconButton,
+  Leader,
+  MenuHeading,
+  Message,
+  Ornament,
+  PageTitle,
+  Photo,
+  Skeleton,
+  StepNumber,
+  Tag,
+  TopBar,
+  type IconName,
+} from "../../ui";
 
 function Fact({ icon, children }: { icon: IconName; children: string }) {
   return (
@@ -41,17 +58,17 @@ export default function RecipeDetailPage() {
     return (
       <div className="flex flex-col gap-5">
         <TopBar to="/" label="Recettes" />
-        <div className="skeleton aspect-4/3" />
-        <div className="skeleton h-9 w-2/3 rounded-lg" />
+        <Skeleton className="aspect-4/3" />
+        <Skeleton className="h-9 w-2/3 rounded-lg" />
       </div>
     );
   if (error || !r)
     return (
       <div className="flex flex-col gap-5">
         <TopBar to="/" label="Recettes" />
-        <p className="card p-6 text-center text-muted">
+        <Card as="p" className="p-6 text-center text-muted">
           {error ?? "Recette introuvable."}
-        </p>
+        </Card>
       </div>
     );
 
@@ -97,50 +114,45 @@ export default function RecipeDetailPage() {
   return (
     <article className="flex animate-pop flex-col gap-6">
       <TopBar to="/" label="Recettes">
-        <button
-          onClick={toggleFavorite}
+        <IconButton
+          variant="outlined"
+          size="sm"
+          label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
           aria-pressed={isFavorite}
-          aria-label={
-            isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"
-          }
-          className={`btn-secondary btn-sm size-9 px-0 ${isFavorite ? "text-primary" : ""}`}
+          className={cn(isFavorite && "text-primary")}
+          onClick={toggleFavorite}
         >
           <Icon name="heart" size={17} filled={isFavorite} />
-        </button>
+        </IconButton>
         {isOwner && (
-          <Link
+          <ButtonLink
             to={`/recettes/${r.id}/modifier`}
-            className="btn-secondary btn-sm h-9 gap-1.5 px-3.5"
+            variant="secondary"
+            size="xs"
           >
             <Icon name="edit" size={15} />
             Modifier
-          </Link>
+          </ButtonLink>
         )}
       </TopBar>
-      {favoriteError && (
-        <p role="alert" className="-mt-3 text-sm font-semibold text-primary">
-          {favoriteError}
-        </p>
-      )}
+      {favoriteError && <Message className="-mt-3">{favoriteError}</Message>}
 
       {r.photo_path && (
-        <div className="print">
-          <img
+        <Card className="p-1.5">
+          <Photo
             src={photoUrl(r.photo_path)}
             alt={r.title}
-            className="aspect-4/3 w-full object-cover"
+            className="aspect-4/3"
           />
-        </div>
+        </Card>
       )}
 
       <header className="flex flex-col items-center gap-3 text-center">
-        <h1 className="page-title">{r.title}</h1>
+        <PageTitle>{r.title}</PageTitle>
         <p className="-mt-1 font-display text-[1.0625rem] italic text-wood">
           {isOwner ? "Ta recette" : `La recette de ${r.author}`}
         </p>
-        <div className="ornament w-24">
-          <i />
-        </div>
+        <Ornament className="w-24" />
         {!!(r.servings || r.prep_minutes || r.cook_minutes) && (
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
             {!!r.servings && (
@@ -157,23 +169,23 @@ export default function RecipeDetailPage() {
         <div className="flex flex-wrap items-center justify-center gap-2">
           {groupNames.length ? (
             groupNames.map((n) => (
-              <span key={n} className="tag">
+              <Tag key={n}>
                 <Icon name="users" size={12} />
                 {n}
-              </span>
+              </Tag>
             ))
           ) : (
-            <span className="tag tag-muted">
+            <Tag muted>
               <Icon name="lock" size={12} />
               Privée
-            </span>
+            </Tag>
           )}
         </div>
       </header>
 
       {r.ingredients.length > 0 && (
-        <section className="card card-menu px-6 pb-4 pt-6">
-          <h2 className="menu-heading">Ingrédients</h2>
+        <Card as="section" menu className="px-6 pb-4 pt-6">
+          <MenuHeading>Ingrédients</MenuHeading>
           <p className="mt-1 text-center text-xs text-subtle">
             {progress.ingredients.size
               ? `${progress.ingredients.size} sur ${r.ingredients.length} cochés`
@@ -187,14 +199,20 @@ export default function RecipeDetailPage() {
                   <button
                     onClick={() => progress.toggleIngredient(i)}
                     aria-pressed={on}
-                    className={`flex w-full items-baseline gap-2.5 py-2 text-left transition ${on ? "opacity-55" : ""}`}
+                    className={cn(
+                      "flex w-full items-baseline gap-2.5 py-2 text-left transition",
+                      on && "opacity-55",
+                    )}
                   >
                     <span
-                      className={`grid size-5 shrink-0 translate-y-0.5 place-items-center self-center rounded-full border transition ${on ? "border-accent bg-accent text-on-primary" : "border-wood/50"}`}
+                      className={cn(
+                        "grid size-5 shrink-0 translate-y-0.5 place-items-center self-center rounded-full border border-wood/50 transition",
+                        on && "border-accent bg-accent text-on-primary",
+                      )}
                     >
                       {on && <Icon name="check" size={12} />}
                     </span>
-                    <span className={on ? "line-through" : ""}>
+                    <span className={cn(on && "line-through")}>
                       {ing.name.charAt(0).toUpperCase() + ing.name.slice(1)}
                       {ing.optional && (
                         <span className="ml-1.5 text-sm italic text-subtle">
@@ -202,7 +220,7 @@ export default function RecipeDetailPage() {
                         </span>
                       )}
                     </span>
-                    <span className="leader" />
+                    <Leader />
                     <span className="shrink-0 font-display italic text-wood">
                       {formatQuantity(ing)}
                     </span>
@@ -211,12 +229,12 @@ export default function RecipeDetailPage() {
               );
             })}
           </ul>
-        </section>
+        </Card>
       )}
 
       {steps.length > 0 && (
         <section className="px-1">
-          <h2 className="menu-heading">Préparation</h2>
+          <MenuHeading>Préparation</MenuHeading>
           <p className="mt-1 text-center text-xs text-subtle">
             {progress.steps.size
               ? `${progress.steps.size} sur ${steps.length} étapes faites`
@@ -230,9 +248,12 @@ export default function RecipeDetailPage() {
                   <button
                     onClick={() => progress.toggleStep(i)}
                     aria-pressed={done}
-                    className={`-mx-2 flex w-[calc(100%+1rem)] gap-4 rounded-xl px-2 py-2.5 text-left transition active:bg-line ${done ? "opacity-55" : ""}`}
+                    className={cn(
+                      "-mx-2 flex w-[calc(100%+1rem)] gap-4 rounded-xl px-2 py-2.5 text-left transition active:bg-line",
+                      done && "opacity-55",
+                    )}
                   >
-                    <span className="num grid w-6 shrink-0 justify-items-end pt-0.5">
+                    <StepNumber className="grid w-6 shrink-0 justify-items-end pt-0.5">
                       {done ? (
                         <span className="grid size-6 place-items-center rounded-full bg-accent text-on-primary">
                           <Icon name="check" size={14} />
@@ -240,7 +261,7 @@ export default function RecipeDetailPage() {
                       ) : (
                         i + 1
                       )}
-                    </span>
+                    </StepNumber>
                     <span className="leading-relaxed">{s}</span>
                   </button>
                 </li>
@@ -251,13 +272,15 @@ export default function RecipeDetailPage() {
       )}
 
       {started && (
-        <button
-          className="btn-secondary btn-sm self-center"
+        <Button
+          variant="secondary"
+          size="sm"
+          className="self-center"
           onClick={progress.reset}
         >
           <Icon name="reset" size={16} />
           Tout décocher
-        </button>
+        </Button>
       )}
 
       <p className="text-center text-xs text-subtle">
@@ -271,15 +294,11 @@ export default function RecipeDetailPage() {
 
       {isOwner && (
         <div className="-mt-3 flex flex-col items-center">
-          <button className="btn-danger" onClick={remove}>
+          <Button variant="danger" onClick={remove}>
             <Icon name="trash" size={16} />
             Supprimer la recette
-          </button>
-          {deleteError && (
-            <p role="alert" className="text-sm font-semibold text-primary">
-              {deleteError}
-            </p>
-          )}
+          </Button>
+          {deleteError && <Message>{deleteError}</Message>}
         </div>
       )}
       {dialog}

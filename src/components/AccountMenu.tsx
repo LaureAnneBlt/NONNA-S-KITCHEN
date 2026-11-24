@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import { frenchError } from "../lib/errors";
 import { useAuth } from "../features/auth/AuthProvider";
 import { getDisplayName, setDisplayName } from "../features/auth/profile";
-import { Icon } from "./Icons";
+import { Button, Card, Icon, IconButton, Input, Label, Message } from "../ui";
 
 export default function AccountMenu() {
   const { session } = useAuth();
@@ -55,9 +55,9 @@ export default function AccountMenu() {
         {(name || email)[0]?.toUpperCase() ?? "·"}
       </button>
       {open && (
-        <div
+        <Card
           role="menu"
-          className="card absolute right-0 top-11 z-30 w-64 animate-pop p-1.5 text-fg shadow-raised"
+          className="absolute right-0 top-11 z-30 w-64 animate-pop p-1.5 text-fg shadow-raised"
         >
           {draft === null ? (
             <div className="flex items-center gap-2 px-3 pb-2 pt-2.5">
@@ -69,23 +69,22 @@ export default function AccountMenu() {
                   {email}
                 </span>
               </p>
-              <button
+              <IconButton
                 role="menuitem"
-                aria-label="Modifier mon prénom"
-                className="icon-btn size-9"
+                label="Modifier mon prénom"
+                size="sm"
                 onClick={() => setDraft(name)}
               >
                 <Icon name="edit" size={16} />
-              </button>
+              </IconButton>
             </div>
           ) : (
             <form onSubmit={saveName} className="flex flex-col gap-2 p-2">
-              <label htmlFor="display-name" className="field-label mb-0">
+              <Label htmlFor="display-name" className="mb-0">
                 Ton prénom
-              </label>
-              <input
+              </Label>
+              <Input
                 id="display-name"
-                className="input"
                 required
                 maxLength={40}
                 autoFocus
@@ -95,20 +94,20 @@ export default function AccountMenu() {
               <p className="text-xs text-muted">
                 C’est ce que ta famille voit sur tes recettes.
               </p>
-              {error && (
-                <p role="alert" className="text-xs font-semibold text-primary">
-                  {error}
-                </p>
-              )}
+              {error && <Message className="text-xs">{error}</Message>}
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
-                  className="btn-secondary btn-sm flex-1"
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
                   onClick={() => setDraft(null)}
                 >
                   Annuler
-                </button>
-                <button className="btn btn-sm flex-1">Enregistrer</button>
+                </Button>
+                <Button size="sm" className="flex-1">
+                  Enregistrer
+                </Button>
               </div>
             </form>
           )}
@@ -121,7 +120,7 @@ export default function AccountMenu() {
             <Icon name="logout" size={18} />
             Se déconnecter
           </button>
-        </div>
+        </Card>
       )}
     </div>
   );

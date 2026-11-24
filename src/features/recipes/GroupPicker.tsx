@@ -1,4 +1,4 @@
-import { Icon } from "../../components/Icons";
+import { Chip, Icon } from "../../ui";
 import type { Group } from "../groups/api";
 
 type Props = {
@@ -33,17 +33,16 @@ export default function GroupPicker({
         {groups.map((g) => {
           const on = value.includes(g.id);
           return (
-            <button
+            <Chip
               key={g.id}
-              type="button"
+              on={on}
               aria-pressed={on}
               disabled={disabled}
               onClick={() => toggle(g.id)}
-              className={`filter ${on ? "is-on" : ""}`}
             >
               {on && <Icon name="check" size={14} />}
               {g.name}
-            </button>
+            </Chip>
           );
         })}
       </div>

@@ -12,9 +12,22 @@ import {
   inviteLink,
   type Group,
 } from "./api";
-import { Icon } from "../../components/Icons";
-import { PageHeader } from "../../components/PageHeader";
 import { useConfirm } from "../../components/Confirm";
+import {
+  Button,
+  Card,
+  Chip,
+  cn,
+  Icon,
+  Input,
+  Label,
+  Message,
+  PageHeader,
+  SectionTitle,
+  Skeleton,
+  Tag,
+  TextButton,
+} from "../../ui";
 
 function inviteText(g: Group) {
   return (
@@ -42,10 +55,10 @@ function InviteButton({ group }: { group: Group }) {
     setTimeout(() => setCopied(false), 2000);
   }
   return (
-    <button className="btn btn-sm w-full" onClick={invite}>
+    <Button size="sm" className="w-full" onClick={invite}>
       <Icon name={copied ? "check" : "share"} size={17} />
       {copied ? "Invitation copiée" : "Inviter quelqu’un"}
-    </button>
+    </Button>
   );
 }
 
@@ -57,10 +70,11 @@ function CopyCode({ code }: { code: string }) {
       setTimeout(() => setCopied(false), 1500);
     });
   return (
-    <button
+    <Chip
+      on={copied}
       onClick={copy}
       aria-label={`Copier le code ${code}`}
-      className={`filter h-8 gap-1.5 px-3 font-semibold tracking-[0.06em] ${copied ? "is-on" : "text-fg"}`}
+      className="h-8 px-3 font-semibold tracking-[0.06em] text-fg"
     >
       {copied ? (
         <>
@@ -73,7 +87,7 @@ function CopyCode({ code }: { code: string }) {
           <Icon name="copy" size={13} />
         </>
       )}
-    </button>
+    </Chip>
   );
 }
 
@@ -125,13 +139,13 @@ function GroupCard({
 
   const count = g.members.length;
   return (
-    <li className="card card-menu animate-pop">
+    <Card as="li" menu className="animate-pop">
       <button
         onClick={onToggle}
         aria-expanded={open}
         className="flex w-full items-center gap-3 px-5 py-4 text-left"
       >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-brass bg-door font-display text-lg font-semibold italic text-on-primary shadow-[0_0_0_2px_var(--color-surface),0_0_0_3px_color-mix(in_oklab,var(--color-brass)_40%,transparent)]">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-brass bg-door font-display text-lg font-semibold italic text-on-primary shadow-medallion">
           {g.name[0]?.toUpperCase()}
         </span>
         <span className="min-w-0 flex-1">
@@ -142,7 +156,7 @@ function GroupCard({
             {count} membre{count > 1 ? "s" : ""}
           </span>
         </span>
-        <span className={`text-subtle transition ${open ? "rotate-180" : ""}`}>
+        <span className={cn("text-subtle transition", open && "rotate-180")}>
           <Icon name="chevron" size={20} />
         </span>
       </button>
@@ -150,12 +164,12 @@ function GroupCard({
       {open && (
         <div className="flex flex-col gap-5 border-t border-dashed border-line-strong px-5 pb-5 pt-4">
           <div>
-            <h3 className="field-label">Membres</h3>
+            <Label as="h3">Membres</Label>
             <ul className="flex flex-wrap gap-1.5">
               {g.members.map((m) => (
-                <li key={m.user_id} className="tag tag-muted text-sm">
+                <Tag as="li" key={m.user_id} muted className="text-sm">
                   {m.display_name}
-                </li>
+                </Tag>
               ))}
             </ul>
           </div>
@@ -170,58 +184,53 @@ function GroupCard({
 
           {renaming ? (
             <form onSubmit={rename} className="flex flex-col gap-2">
-              <label htmlFor={`rename-${g.id}`} className="field-label mb-0">
+              <Label htmlFor={`rename-${g.id}`} className="mb-0">
                 Nouveau nom
-              </label>
+              </Label>
               <div className="flex gap-2">
-                <input
+                <Input
                   id={`rename-${g.id}`}
-                  className="input"
                   required
                   maxLength={60}
                   autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
-                <button className="btn h-auto shrink-0 px-5">OK</button>
+                <Button size="stretch">OK</Button>
               </div>
-              <button
-                type="button"
-                className="self-start text-sm text-muted underline underline-offset-2"
+              <TextButton
+                className="self-start text-sm text-muted"
                 onClick={() => {
                   setRenaming(false);
                   setName(g.name);
                 }}
               >
                 Annuler
-              </button>
+              </TextButton>
             </form>
           ) : (
             <div className="flex flex-wrap items-center justify-center gap-2">
               {isOwner && (
-                <button
-                  className="btn-secondary btn-sm"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setRenaming(true)}
                 >
                   <Icon name="edit" size={15} />
                   Renommer
-                </button>
+                </Button>
               )}
-              <button className="btn-danger" onClick={leave}>
+              <Button variant="danger" onClick={leave}>
                 <Icon name="logout" size={16} />
                 Quitter la famille
-              </button>
+              </Button>
             </div>
           )}
-          {error && (
-            <p className="text-sm font-semibold text-primary" role="alert">
-              {error}
-            </p>
-          )}
+          {error && <Message>{error}</Message>}
         </div>
       )}
       {dialog}
-    </li>
+    </Card>
   );
 }
 
@@ -269,19 +278,15 @@ export default function GroupsPage() {
         invite-les.
       </PageHeader>
 
-      {groups.loading && !groups.data && <div className="skeleton h-20" />}
-      {groups.error && (
-        <p className="text-sm font-semibold text-primary" role="alert">
-          {groups.error}
-        </p>
-      )}
+      {groups.loading && !groups.data && <Skeleton className="h-20" />}
+      {groups.error && <Message>{groups.error}</Message>}
       {groups.data?.length === 0 && (
-        <div className="card card-menu px-6 py-8 text-center">
-          <h2 className="section-title italic">Pas encore de famille</h2>
+        <Card menu className="px-6 py-8 text-center">
+          <SectionTitle className="italic">Pas encore de famille</SectionTitle>
           <p className="mt-1.5 text-sm text-muted">
             Crée la tienne, ou rejoins celle d’un proche avec son code.
           </p>
-        </div>
+        </Card>
       )}
       {!!groups.data?.length && (
         <ul className="flex flex-col gap-3">
@@ -310,15 +315,12 @@ export default function GroupsPage() {
       )}
 
       {success && (
-        <p
-          className="text-center text-sm font-semibold text-accent"
-          role="status"
-        >
+        <Message tone="success" className="text-center">
           {success}
-        </p>
+        </Message>
       )}
 
-      <div className="card card-menu flex flex-col gap-5 p-6">
+      <Card menu className="flex flex-col gap-5 p-6">
         <form
           className="flex flex-col"
           onSubmit={run(
@@ -330,14 +332,14 @@ export default function GroupsPage() {
             },
           )}
         >
-          <label htmlFor="group-code" className="field-label">
-            Rejoindre avec un code
-          </label>
+          <Label htmlFor="group-code">Rejoindre avec un code</Label>
           <div className="flex gap-2">
-            <input
+            <Input
               ref={joinInput}
               id="group-code"
-              className={`input ${invited && code ? "border-accent ring-[3px] ring-accent/15" : ""}`}
+              className={cn(
+                invited && code && "border-accent ring-[3px] ring-accent/15",
+              )}
               placeholder="Ex : 3fa9c21b"
               required
               autoCapitalize="none"
@@ -346,9 +348,9 @@ export default function GroupsPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
-            <button className="btn h-auto shrink-0 px-5" disabled={!!alreadyIn}>
+            <Button size="stretch" disabled={!!alreadyIn}>
               Rejoindre
-            </button>
+            </Button>
           </div>
           {alreadyIn && (
             <p className="mt-2 text-sm text-muted">
@@ -371,30 +373,23 @@ export default function GroupsPage() {
             },
           )}
         >
-          <label htmlFor="group-name" className="field-label">
-            Créer une famille
-          </label>
+          <Label htmlFor="group-name">Créer une famille</Label>
           <div className="flex gap-2">
-            <input
+            <Input
               id="group-name"
-              className="input"
               placeholder="Ex : Les Rossi"
               required
               maxLength={60}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <button className="btn-secondary h-auto shrink-0 px-5">
+            <Button variant="secondary" size="stretch">
               Créer
-            </button>
+            </Button>
           </div>
         </form>
-        {error && (
-          <p className="text-sm font-semibold text-primary" role="alert">
-            {error}
-          </p>
-        )}
-      </div>
+        {error && <Message>{error}</Message>}
+      </Card>
     </section>
   );
 }

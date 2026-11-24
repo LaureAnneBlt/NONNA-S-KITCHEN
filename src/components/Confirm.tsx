@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Button, Card, SectionTitle } from "../ui";
 
 type Options = {
   title: string;
@@ -56,32 +57,33 @@ function ConfirmDialog({
       className="fixed inset-0 z-60 flex items-end justify-center bg-espresso-900/45 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:items-center"
       onPointerDown={(e) => e.target === e.currentTarget && onClose(false)}
     >
-      <div
+      <Card
+        menu
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
-        className="card card-menu w-full max-w-sm animate-pop p-6 text-center shadow-raised"
+        className="w-full max-w-sm animate-pop p-6 text-center shadow-raised"
       >
-        <h2 id="confirm-title" className="section-title italic">
+        <SectionTitle id="confirm-title" className="italic">
           {title}
-        </h2>
+        </SectionTitle>
         {message && (
           <p className="mt-2 text-[0.9375rem] text-muted">{message}</p>
         )}
         <div className="mt-6 flex flex-col gap-2">
-          <button type="button" className="btn" onClick={() => onClose(true)}>
+          <Button type="button" onClick={() => onClose(true)}>
             {confirmLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             ref={cancel}
-            className="btn-secondary"
+            variant="secondary"
             onClick={() => onClose(false)}
           >
             {cancelLabel}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

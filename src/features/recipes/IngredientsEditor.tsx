@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Icon } from "../../components/Icons";
+import { Button, Chip, Icon, IconButton, Input, Select } from "../../ui";
 import { UNITS, formatIngredient, type Ingredient } from "./format";
 
 export const emptyIngredient = (): Ingredient => ({
@@ -41,9 +41,8 @@ export default function IngredientsEditor({ value, onChange }: Props) {
             className="group flex flex-col gap-2 border-b border-dashed border-line-strong pb-3 last:border-0 last:pb-0"
           >
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 data-name
-                className="input"
                 aria-label="Ingrédient"
                 placeholder="Ingrédient (ex : jambon)"
                 enterKeyHint="next"
@@ -57,26 +56,25 @@ export default function IngredientsEditor({ value, onChange }: Props) {
                 }}
               />
               {value.length > 1 && (
-                <button
-                  type="button"
-                  aria-label="Retirer l’ingrédient"
-                  className="icon-btn size-9"
+                <IconButton
+                  label="Retirer l’ingrédient"
+                  size="sm"
                   onClick={() => onChange(value.filter((_, idx) => idx !== i))}
                 >
                   <Icon name="x" size={18} />
-                </button>
+                </IconButton>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <input
-                className="input w-18 shrink-0 text-center"
+              <Input
+                className="w-18 shrink-0 text-center"
                 aria-label="Quantité"
                 placeholder="Qté"
                 value={item.quantity}
                 onChange={(e) => update(i, { quantity: e.target.value })}
               />
-              <select
-                className="input min-w-0 flex-1"
+              <Select
+                className="min-w-0 flex-1"
                 aria-label="Unité"
                 value={item.unit}
                 onChange={(e) => update(i, { unit: e.target.value })}
@@ -86,15 +84,15 @@ export default function IngredientsEditor({ value, onChange }: Props) {
                     {u || "— unité —"}
                   </option>
                 ))}
-              </select>
-              <button
-                type="button"
+              </Select>
+              <Chip
+                on={!!item.optional}
                 aria-pressed={!!item.optional}
                 onClick={() => update(i, { optional: !item.optional })}
-                className={`filter h-11 px-3 text-xs ${item.optional ? "is-on" : ""}`}
+                className="h-11 px-3 text-xs"
               >
                 {item.optional && <Icon name="check" size={13} />}Facultatif
-              </button>
+              </Chip>
             </div>
             {item.name.trim() && (
               <p className="hidden text-sm italic text-subtle group-focus-within:block">
@@ -105,14 +103,16 @@ export default function IngredientsEditor({ value, onChange }: Props) {
           </li>
         ))}
       </ul>
-      <button
+      <Button
         type="button"
-        className="btn-secondary btn-sm border-dashed"
+        variant="secondary"
+        size="sm"
+        className="border-dashed"
         onClick={add}
       >
         <Icon name="plus" size={16} />
         Ajouter un ingrédient
-      </button>
+      </Button>
     </div>
   );
 }

@@ -1,9 +1,20 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
-import { Icon } from "../../components/Icons";
 import { useConfirm } from "../../components/Confirm";
 import { frenchError } from "../../lib/errors";
-import { PageHeader, TopBar } from "../../components/PageHeader";
+import {
+  Button,
+  Card,
+  Field,
+  Icon,
+  Input,
+  Label,
+  MenuHeading,
+  Message,
+  PageHeader,
+  Plate,
+  TopBar,
+} from "../../ui";
 import { useAsync } from "../../lib/useAsync";
 import { listGroups } from "../groups/api";
 import {
@@ -44,14 +55,11 @@ function NumberField({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="min-w-0">
-      <label htmlFor={id} className="field-label">
-        {label}
-      </label>
+    <Field label={label} htmlFor={id} className="min-w-0">
       <div className="relative">
-        <input
+        <Input
           id={id}
-          className="input pr-11"
+          className="pr-11"
           inputMode="numeric"
           placeholder="–"
           maxLength={4}
@@ -62,7 +70,7 @@ function NumberField({
           {suffix}
         </span>
       </div>
-    </div>
+    </Field>
   );
 }
 
@@ -180,20 +188,16 @@ export default function RecipeForm({ recipe }: { recipe?: Recipe }) {
         title={recipe ? "Modifier la recette" : "Nouvelle recette"}
       />
 
-      <section className="card card-menu flex flex-col gap-5 p-6">
-        <div>
-          <label htmlFor="title" className="field-label">
-            Nom de la recette
-          </label>
-          <input
+      <Card as="section" menu className="flex flex-col gap-5 p-6">
+        <Field label="Nom de la recette" htmlFor="title">
+          <Input
             id="title"
-            className="input"
             required
             placeholder="Ex : lasagnes de Nonna"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-        </div>
+        </Field>
         <div className="grid grid-cols-3 gap-2">
           <NumberField
             id="servings"
@@ -218,7 +222,7 @@ export default function RecipeForm({ recipe }: { recipe?: Recipe }) {
           />
         </div>
         <div>
-          <span className="field-label">Photo</span>
+          <Label as="span">Photo</Label>
           <input
             ref={fileInput}
             type="file"
@@ -238,20 +242,24 @@ export default function RecipeForm({ recipe }: { recipe?: Recipe }) {
                 className="aspect-4/3 w-full object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-linear-to-t from-black/45 to-transparent p-3 pt-8">
-                <button
+                <Button
                   type="button"
-                  className="btn-secondary btn-sm h-9 border-0"
+                  variant="overlay"
+                  size="sm"
+                  className="h-9"
                   onClick={() => fileInput.current?.click()}
                 >
                   Changer
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="btn-secondary btn-sm h-9 border-0 text-primary"
+                  variant="overlay"
+                  size="sm"
+                  className="h-9 text-primary"
                   onClick={dropPhoto}
                 >
                   Retirer
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -260,53 +268,49 @@ export default function RecipeForm({ recipe }: { recipe?: Recipe }) {
               onClick={() => fileInput.current?.click()}
               className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line-strong bg-canvas text-sm font-semibold text-muted transition active:bg-sunken"
             >
-              <span className="plate size-12">
+              <Plate className="size-12">
                 <Icon name="camera" size={22} />
-              </span>
+              </Plate>
               Ajouter une photo
             </button>
           )}
         </div>
-      </section>
+      </Card>
 
-      <section className="card p-5">
-        <h2 className="menu-heading">Ingrédients</h2>
+      <Card as="section" className="p-5">
+        <MenuHeading>Ingrédients</MenuHeading>
         <p className="mb-4 mt-1.5 text-center text-sm text-muted">
           Quantité et unité sont facultatives.
         </p>
         <IngredientsEditor value={ingredients} onChange={setIngredients} />
-      </section>
+      </Card>
 
-      <section className="card p-5">
-        <h2 className="menu-heading">Préparation</h2>
+      <Card as="section" className="p-5">
+        <MenuHeading>Préparation</MenuHeading>
         <p className="mb-4 mt-1.5 text-center text-sm text-muted">
           Une étape par ligne : <b className="font-semibold text-fg">Entrée</b>{" "}
           passe à la suivante.
         </p>
         <StepsEditor value={steps} onChange={setSteps} />
-      </section>
+      </Card>
 
-      <section className="card p-5">
-        <h2 className="menu-heading mb-4">Partager avec</h2>
+      <Card as="section" className="p-5">
+        <MenuHeading className="mb-4">Partager avec</MenuHeading>
         <GroupPicker
           groups={groups.data ?? []}
           value={groupIds}
           onChange={setGroupIds}
         />
-      </section>
+      </Card>
 
-      {error && (
-        <p role="alert" className="text-sm font-semibold text-primary">
-          {error}
-        </p>
-      )}
-      <button className="btn" disabled={busy}>
+      {error && <Message>{error}</Message>}
+      <Button disabled={busy}>
         {busy
           ? "Enregistrement…"
           : recipe
             ? "Enregistrer les modifications"
             : "Enregistrer la recette"}
-      </button>
+      </Button>
       {dialog}
     </form>
   );
