@@ -32,8 +32,16 @@ function RecipeTile({
   return (
     <Link
       to={`/recettes/${r.id}`}
-      className="print flex animate-pop flex-col transition active:scale-[0.98]"
+      className="print relative flex animate-pop flex-col transition active:scale-[0.98]"
     >
+      {r.favorite && (
+        <span
+          className="absolute right-3 top-3 z-10 grid size-7 place-items-center rounded-full bg-surface text-primary shadow-card"
+          aria-label="Favorite"
+        >
+          <Icon name="heart" size={14} filled />
+        </span>
+      )}
       {r.photo_path ? (
         <img
           src={photoUrl(r.photo_path)}
@@ -81,6 +89,7 @@ export default function RecipesPage() {
   const visible = recipes.data?.filter(
     (r) =>
       (filter === "all" ||
+        (filter === "favorites" && r.favorite) ||
         (filter === "private"
           ? r.group_ids.length === 0
           : r.group_ids.includes(filter))) &&
@@ -91,6 +100,7 @@ export default function RecipesPage() {
   );
   const filters = [
     { id: "all", name: "Toutes" },
+    { id: "favorites", name: "Favorites" },
     { id: "private", name: "Privées" },
     ...(groups.data ?? []),
   ];
@@ -128,6 +138,9 @@ export default function RecipesPage() {
                 className={`filter ${filter === f.id ? "is-on" : ""}`}
                 onClick={() => setFilter(f.id)}
               >
+                {f.id === "favorites" && (
+                  <Icon name="heart" size={14} filled={filter === f.id} />
+                )}
                 {f.name}
               </button>
             ))}
@@ -163,14 +176,23 @@ export default function RecipesPage() {
           </Link>
         </div>
       )}
-      {!empty && visible?.length === 0 && (
-        <div className="py-10 text-center">
-          <h2 className="section-title">Aucune recette trouvée</h2>
-          <p className="mt-1.5 text-sm text-muted">
-            Essaie un autre mot ou un autre filtre.
-          </p>
-        </div>
-      )}
+      {!empty &&
+        visible?.length === 0 &&
+        (filter === "favorites" && !q ? (
+          <div className="py-10 text-center">
+            <h2 className="section-title">Pas encore de favorites</h2>
+            <p className="mt-1.5 text-sm text-muted">
+              Touche le cœur sur une recette pour la retrouver ici.
+            </p>
+          </div>
+        ) : (
+          <div className="py-10 text-center">
+            <h2 className="section-title">Aucune recette trouvée</h2>
+            <p className="mt-1.5 text-sm text-muted">
+              Essaie un autre mot ou un autre filtre.
+            </p>
+          </div>
+        ))}
 
       <div className="grid grid-cols-2 gap-3">
         {visible?.map((r) => (

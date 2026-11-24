@@ -63,17 +63,28 @@ const PATHS = {
   ],
   chevron: ["M6 9l6 6 6-6"],
   reset: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5"],
+  heart: [
+    "M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z",
+  ],
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
-export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
+export function Icon({
+  name,
+  size = 22,
+  filled = false,
+}: {
+  name: IconName;
+  size?: number;
+  filled?: boolean;
+}) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth="1.9"
       strokeLinecap="round"

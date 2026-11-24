@@ -20,6 +20,7 @@ export type Recipe = {
   created_at: string;
   group_ids: string[];
   author: string;
+  favorite: boolean;
 };
 export type RecipeInput = Pick<
   Recipe,
@@ -33,15 +34,24 @@ export type RecipeInput = Pick<
 >;
 export type PhotoChange = { file: File | null; remove: boolean };
 
-type RecipeRow = Omit<Recipe, "group_ids" | "author"> & {
+type RecipeRow = Omit<Recipe, "group_ids" | "author" | "favorite"> & {
   recipe_groups: { group_id: string }[];
   profiles: { display_name: string } | null;
+  favorites: { recipe_id: string }[];
 };
-const SELECT = "*, recipe_groups(group_id), profiles(display_name)";
-const toRecipe = ({ recipe_groups, profiles, ...r }: RecipeRow): Recipe => ({
+
+const SELECT =
+  "*, recipe_groups(group_id), profiles(display_name), favorites(recipe_id)";
+const toRecipe = ({
+  recipe_groups,
+  profiles,
+  favorites,
+  ...r
+}: RecipeRow): Recipe => ({
   ...r,
   group_ids: recipe_groups.map((g) => g.group_id),
   author: profiles?.display_name ?? "Un membre",
+  favorite: favorites.length > 0,
 });
 
 export const photoUrl = (path: string) =>
@@ -152,4 +162,16 @@ export async function deleteRecipe(recipe: Recipe) {
   const { error } = await supabase.from("recipes").delete().eq("id", recipe.id);
   if (error) throw error;
   if (recipe.photo_path) await removePhoto(recipe.photo_path);
+}
+
+export async function setFavorite(recipeId: string, favorite: boolean) {
+  const { error } = favorite
+    ? await supabase
+        .from("favorites")
+        .upsert(
+          { recipe_id: recipeId },
+          { onConflict: "user_id,recipe_id", ignoreDuplicates: true },
+        )
+    : await supabase.from("favorites").delete().eq("recipe_id", recipeId);
+  if (error) throw error;
 }

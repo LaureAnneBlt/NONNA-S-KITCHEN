@@ -23,6 +23,7 @@ Les lasagnes de mamie notées au dos d’une enveloppe, le tiramisù envoyé en 
 - 👨‍👩‍👧 **Partager en famille** : on crée une « famiglia », on envoie son code d’invitation, et chacun voit les recettes partagées avec elle.
 - 🔒 **Garder ses secrets** : une recette peut rester privée, ou être partagée avec une ou plusieurs familles.
 - 🔍 **Retrouver vite** : on cherche par nom de plat ou par ingrédient (« qu’est-ce que je fais avec ces courgettes ? »).
+- ❤️ **Garder ses chouchous** : un cœur sur une recette la met en favorite, et un filtre les regroupe toutes.
 
 ## L’installer sur son téléphone
 

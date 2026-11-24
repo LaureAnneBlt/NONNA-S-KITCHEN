@@ -4,7 +4,7 @@ import { useAsync } from "../../lib/useAsync";
 import { useWakeLock } from "../../lib/useWakeLock";
 import { useCookingProgress } from "../../lib/useCookingProgress";
 import { frenchError } from "../../lib/errors";
-import { deleteRecipe, getRecipe, photoUrl } from "./api";
+import { deleteRecipe, getRecipe, photoUrl, setFavorite } from "./api";
 import { formatDuration, formatQuantity } from "./format";
 import { listGroups } from "../groups/api";
 import { useAuth } from "../auth/AuthProvider";
@@ -33,6 +33,8 @@ export default function RecipeDetailPage() {
   const progress = useCookingProgress(id!);
   const [confirm, dialog] = useConfirm();
   const [deleteError, setDeleteError] = useState("");
+  const [favorite, setFavoriteState] = useState<boolean | null>(null);
+  const [favoriteError, setFavoriteError] = useState("");
   useWakeLock();
 
   if (loading)
@@ -62,6 +64,19 @@ export default function RecipeDetailPage() {
     .map((id) => groups.data?.find((g) => g.id === id)?.name)
     .filter(Boolean) as string[];
   const started = progress.ingredients.size + progress.steps.size > 0;
+  const isFavorite = favorite ?? r.favorite;
+
+  async function toggleFavorite() {
+    const next = !isFavorite;
+    setFavoriteState(next);
+    setFavoriteError("");
+    try {
+      await setFavorite(r!.id, next);
+    } catch (e) {
+      setFavoriteState(!next);
+      setFavoriteError(frenchError(e));
+    }
+  }
 
   async function remove() {
     const ok = await confirm({
@@ -82,6 +97,16 @@ export default function RecipeDetailPage() {
   return (
     <article className="flex animate-pop flex-col gap-6">
       <TopBar to="/" label="Recettes">
+        <button
+          onClick={toggleFavorite}
+          aria-pressed={isFavorite}
+          aria-label={
+            isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"
+          }
+          className={`btn-secondary btn-sm size-9 px-0 ${isFavorite ? "text-primary" : ""}`}
+        >
+          <Icon name="heart" size={17} filled={isFavorite} />
+        </button>
         {isOwner && (
           <Link
             to={`/recettes/${r.id}/modifier`}
@@ -92,6 +117,11 @@ export default function RecipeDetailPage() {
           </Link>
         )}
       </TopBar>
+      {favoriteError && (
+        <p role="alert" className="-mt-3 text-sm font-semibold text-primary">
+          {favoriteError}
+        </p>
+      )}
 
       {r.photo_path && (
         <div className="print">
